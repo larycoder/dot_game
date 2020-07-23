@@ -1,7 +1,7 @@
 from flask import Flask
-from application.route import route
+from dot_game.route import route
 
-app = Flask('application')
+app = Flask('dot_game')
 route(app)
 
 if __name__ == '__main__':
