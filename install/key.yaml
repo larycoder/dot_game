@@ -1,0 +1,10 @@
+---
+admin_password: 12345
+admin_key: secret_admin_key
+normal_user_key: normal_user_key
+guideline_list:
+  - guideline:
+      version: 0.1.0
+      name: title
+      description: This is dot_game guideline
+...
