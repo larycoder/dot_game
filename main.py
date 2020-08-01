@@ -29,5 +29,16 @@ def add_guideline():
     """ add default guideline to GuideLine table """
     addGuideline()
 
+@manager.command
+def install():
+    """ combine of install_key, add_guideline and init_admin """
+    addKey()
+    addAdmin()
+    addGuideline()
+
+@manager.command
+def drop_db():
+    db.drop_all()
+
 if __name__ == '__main__':
     manager.run()

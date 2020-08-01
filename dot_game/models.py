@@ -21,9 +21,11 @@ class GuideLineModel(db.Model):
 
     """ GuideLine Model storing guideline of game """
     id = db.Column(db.Integer, primary_key = True, autoincrement = True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     version = db.Column(db.String(255), nullable = False)
     name = db.Column(db.Text, nullable = False)
     description = db.Column(db.Text)
+    code = db.Column(db.Text)
 
     def __init__(self, version, name, description):
         self.version = version
@@ -59,4 +61,3 @@ class KeyModel(db.Model):
         :return: binary object
         """
         return base64.b64decode(key)
-    
