@@ -48,3 +48,9 @@ def addGuideline():
         )
         db.session.add(new_guideline)
         db.session.commit()
+
+def install():
+    """ combination of addKey, addAdmin and addGuideline """
+    addKey()
+    addAdmin()
+    addGuideline()

@@ -99,8 +99,40 @@ class GuideLineAPI(MethodView):
     Get list of guideline
     """
     def get(self):
+        auth_header = request.headers.get('Authorization')
+
+        if auth_header:
+            try:
+                auth_token = auth_header.split(" ")[1]
+            except IndexError:
+                responseObject = {
+                    'status': 'fail',
+                    'message': 'Bearer token malformed'
+                }
+                return make_response(jsonify(responseObject)), 401
+        else:
+            responseObject = {
+                'status': 'fail',
+                'message': 'Please provide a valid token'
+            }
+            return make_response(jsonify(responseObject)), 401
+
+        resp = regenToken(auth_token)
+        if not isinstance(resp, str):
+            new_token = resp['new_token']
+            user_id = resp['user_id']
+        else:
+            responseObject = {
+                'status': 'fail',
+                'message': resp
+            }
+            return make_response(jsonify(responseObject)), 401
+
         try:
-            list_guideline = GuideLineModel.query.all()
+            list_guideline = GuideLineModel.query.filter(db.or_(
+                GuideLineModel.user_id == user_id,
+                GuideLineModel.user_id == NULL
+            )).all()
             # convert List Model to List dict
             list_dict_of_guideline = []
             for guideline in list_guideline:

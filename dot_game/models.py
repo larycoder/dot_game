@@ -36,7 +36,8 @@ class GuideLineModel(db.Model):
         return {
             'version': self.version,
             'name': self.name,
-            'description': self.description
+            'description': self.description,
+            'code': self.code
         }
 
 class KeyModel(db.Model):
