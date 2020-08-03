@@ -2,6 +2,7 @@ import datetime
 import jwt
 
 from dot_game.models import KeyModel
+from flask import make_response, jsonify
 
 def genToken(service_name, id):
     """
@@ -57,3 +58,31 @@ def regenToken(token):
         }
     else:
         return payload
+
+def checkAuth(request):
+    auth_header = request.headers.get('Authorization')
+    if auth_header:
+        try:
+            auth_token = auth_header.split(' ')[1]
+        except IndexError:
+            responseObject = {
+                'status': 'fail',
+                'message': 'Bearer token malformed'
+            }
+            return make_response(jsonify(responseObject)), 401
+    else:
+        responseObject = {
+            'status': 'fail',
+            'message': 'Please provide valid token.'
+        }
+        return make_response(jsonify(responseObject)), 401
+
+    resp = regenToken(auth_token)
+    if not isinstance(resp, str):
+        return resp
+    else:
+        responseObject = {
+            'status': 'fail',
+            'message': resp
+        }
+        return make_response(jsonify(responseObject)), 401

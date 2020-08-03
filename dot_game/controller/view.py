@@ -4,7 +4,7 @@ from flask.views import MethodView
 from dot_game import db, bcrypt
 from dot_game.models import UserModel, GuideLineModel
 
-from dot_game.controller.helper import genToken, regenToken
+from dot_game.controller.helper import genToken, regenToken, checkAuth
 
 core_blueprint = Blueprint('core', __name__)
 
@@ -83,7 +83,7 @@ class LoginAPI(MethodView):
             else:
                 responseObject = {
                     'status': 'fail',
-                    'message': 'User does not exists.'
+                    'message': 'User or password is wrong.'
                 }
                 return make_response(jsonify(responseObject)), 404
         except Exception as e:
@@ -94,7 +94,48 @@ class LoginAPI(MethodView):
             }
             return make_response(jsonify(responseObject)), 500
 
-class GuideLineAPI(MethodView):
+class GuideLineImportAPI(MethodView):
+    """
+    Import list of guideline
+    """
+    def post(self):
+        post_data = request.get_json()
+        resp = checkAuth(request)
+        if isinstance(resp, dict):
+            try:
+                # add normal information
+                new_guideline = GuideLineModel(
+                    post_data['version'],
+                    post_data['name'],
+                    post_data['description']
+                )
+                new_guideline.user_id = resp['user_id']
+
+                # add code of instruction if exist
+                if 'code' in post_data:
+                    new_guideline.code = post_data['code']
+
+                # push to db
+                db.session.add(new_guideline)
+                db.session.commit()
+
+                responseObject = {
+                    'status': 'success',
+                    'message': 'Successfully import instruction.',
+                    'auth_token': resp['new_token']
+                }
+                return make_response(jsonify(responseObject)), 200
+            except Exception as e:
+                print(e)
+                responseObject = {
+                    'status': 'fail',
+                    'message': 'Something wrong happend. Please try again.'
+                }
+                return make_response(jsonify(responseObject)), 500
+        else:
+            return resp
+
+class GuideLineListAPI(MethodView):
     """
     Get list of guideline
     """
@@ -131,7 +172,7 @@ class GuideLineAPI(MethodView):
         try:
             list_guideline = GuideLineModel.query.filter(db.or_(
                 GuideLineModel.user_id == user_id,
-                GuideLineModel.user_id == NULL
+                GuideLineModel.user_id == None
             )).all()
             # convert List Model to List dict
             list_dict_of_guideline = []
@@ -140,8 +181,9 @@ class GuideLineAPI(MethodView):
 
             responseObject = {
                 'status': 'success',
-                'message': 'Successfully  get guideline',
-                'guideline': list_dict_of_guideline
+                'message': 'Successfully get guideline.',
+                'guideline': list_dict_of_guideline,
+                'auth_token': new_token
             }
             return make_response(jsonify(responseObject)), 200
         except Exception as e:
@@ -155,7 +197,8 @@ class GuideLineAPI(MethodView):
 # Define API view
 registration_view = RegisterAPI.as_view('register_api')
 login_view = LoginAPI.as_view('login_api')
-guideline_view = GuideLineAPI.as_view('guideline_api')
+guideline_list_view = GuideLineListAPI.as_view('guideline_list_api')
+guideline_import_view = GuideLineImportAPI.as_view('guideline_import_api')
 
 # Add rule for API Endpoints
 core_blueprint.add_url_rule(
@@ -169,7 +212,12 @@ core_blueprint.add_url_rule(
     methods = ['POST']
 )
 core_blueprint.add_url_rule(
-    '/core/guideline',
-    view_func = guideline_view,
+    '/core/guideline/list',
+    view_func = guideline_list_view,
     methods = ['GET']
+)
+core_blueprint.add_url_rule(
+    '/core/guideline/import',
+    view_func = guideline_import_view,
+    methods = ['POST']
 )
