@@ -1,14 +1,15 @@
 from flask import Blueprint, request, make_response, jsonify
-from flask.views import MethodView
+from flask_restful import Resource, Api
 
 from dot_game import db, bcrypt
-from dot_game.models import UserModel, GuideLineModel
 
+from dot_game.models import UserModel, GuideLineModel
 from dot_game.controller.helper import genToken, regenToken, checkAuth
 
 core_blueprint = Blueprint('core', __name__)
+core_api = Api(core_blueprint)
 
-class RegisterAPI(MethodView):
+class RegisterAPI(Resource):
     """
     User Register Resource
     """
@@ -42,21 +43,21 @@ class RegisterAPI(MethodView):
                     'message': 'Successfully registered.',
                     'auth_token': auth_token
                 }
-                return make_response(jsonify(responseObject)), 201
+                return make_response(jsonify(responseObject), 201)
             except Exception as e:
                 responseObject = {
                     'status': 'fail',
                     'message': 'Some error occurred. Please try again.'
                 }
-                return make_response(jsonify(responseObject)), 401
+                return make_response(jsonify(responseObject), 401)
         else:
             responseObject = {
                 'status': 'fail',
                 'message': 'User already exists. Please Log in.'
             }
-            return make_response(jsonify(responseObject)), 202
+            return make_response(jsonify(responseObject), 202)
 
-class LoginAPI(MethodView):
+class LoginAPI(Resource):
     """
     User Login Resource
     """
@@ -79,22 +80,22 @@ class LoginAPI(MethodView):
                     'message': 'Successfully logged in.',
                     'auth_token': auth_token
                 }
-                return make_response(jsonify(responseObject)), 200
+                return make_response(jsonify(responseObject), 200)
             else:
                 responseObject = {
                     'status': 'fail',
                     'message': 'User or password is wrong.'
                 }
-                return make_response(jsonify(responseObject)), 404
+                return make_response(jsonify(responseObject), 404)
         except Exception as e:
             print(e)
             responseObject = {
                 'status': 'fail',
                 'message': 'Try again.'
             }
-            return make_response(jsonify(responseObject)), 500
+            return make_response(jsonify(responseObject), 500)
 
-class GuideLineImportAPI(MethodView):
+class GuideLineImportAPI(Resource):
     """
     Import list of guideline
     """
@@ -124,18 +125,18 @@ class GuideLineImportAPI(MethodView):
                     'message': 'Successfully import instruction.',
                     'auth_token': resp['new_token']
                 }
-                return make_response(jsonify(responseObject)), 200
+                return make_response(jsonify(responseObject), 200)
             except Exception as e:
                 print(e)
                 responseObject = {
                     'status': 'fail',
                     'message': 'Something wrong happend. Please try again.'
                 }
-                return make_response(jsonify(responseObject)), 500
+                return make_response(jsonify(responseObject), 500)
         else:
             return resp
 
-class GuideLineListAPI(MethodView):
+class GuideLineListAPI(Resource):
     """
     Get list of guideline
     """
@@ -150,13 +151,13 @@ class GuideLineListAPI(MethodView):
                     'status': 'fail',
                     'message': 'Bearer token malformed'
                 }
-                return make_response(jsonify(responseObject)), 401
+                return make_response(jsonify(responseObject), 401)
         else:
             responseObject = {
                 'status': 'fail',
                 'message': 'Please provide a valid token'
             }
-            return make_response(jsonify(responseObject)), 401
+            return make_response(jsonify(responseObject), 401)
 
         resp = regenToken(auth_token)
         if not isinstance(resp, str):
@@ -167,7 +168,7 @@ class GuideLineListAPI(MethodView):
                 'status': 'fail',
                 'message': resp
             }
-            return make_response(jsonify(responseObject)), 401
+            return make_response(jsonify(responseObject), 401)
 
         try:
             list_guideline = GuideLineModel.query.filter(db.or_(
@@ -185,39 +186,17 @@ class GuideLineListAPI(MethodView):
                 'guideline': list_dict_of_guideline,
                 'auth_token': new_token
             }
-            return make_response(jsonify(responseObject)), 200
+            return make_response(jsonify(responseObject), 200)
         except Exception as e:
             print(e)
             responseObject = {
                 'status': 'fail',
                 'message': 'Something wrong happend. Please try again.'
             }
-            return make_response(jsonify(responseObject)), 500
+            return make_response(jsonify(responseObject), 500)
 
-# Define API view
-registration_view = RegisterAPI.as_view('register_api')
-login_view = LoginAPI.as_view('login_api')
-guideline_list_view = GuideLineListAPI.as_view('guideline_list_api')
-guideline_import_view = GuideLineImportAPI.as_view('guideline_import_api')
-
-# Add rule for API Endpoints
-core_blueprint.add_url_rule(
-    '/core/register',
-    view_func = registration_view,
-    methods = ['POST']
-)
-core_blueprint.add_url_rule(
-    '/core/login',
-    view_func = login_view,
-    methods = ['POST']
-)
-core_blueprint.add_url_rule(
-    '/core/guideline/list',
-    view_func = guideline_list_view,
-    methods = ['GET']
-)
-core_blueprint.add_url_rule(
-    '/core/guideline/import',
-    view_func = guideline_import_view,
-    methods = ['POST']
-)
+# Add resource to api_blueprint
+core_api.add_resource(RegisterAPI, '/core/register', endpoint = 'register_api')
+core_api.add_resource(LoginAPI, '/core/login', endpoint = 'login_api')
+core_api.add_resource(GuideLineImportAPI, '/core/guideline/import', endpoint = 'guideline_import_api')
+core_api.add_resource(GuideLineListAPI, '/core/guideline/list', endpoint = 'guideline_list_api')

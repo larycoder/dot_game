@@ -69,13 +69,13 @@ def checkAuth(request):
                 'status': 'fail',
                 'message': 'Bearer token malformed'
             }
-            return make_response(jsonify(responseObject)), 401
+            return make_response(jsonify(responseObject), 401)
     else:
         responseObject = {
             'status': 'fail',
             'message': 'Please provide valid token.'
         }
-        return make_response(jsonify(responseObject)), 401
+        return make_response(jsonify(responseObject), 401)
 
     resp = regenToken(auth_token)
     if not isinstance(resp, str):
@@ -85,4 +85,4 @@ def checkAuth(request):
             'status': 'fail',
             'message': resp
         }
-        return make_response(jsonify(responseObject)), 401
+        return make_response(jsonify(responseObject), 401)
