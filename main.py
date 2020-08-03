@@ -14,7 +14,7 @@ manager.add_command('db', MigrateCommand)
 @manager.command
 def run_app():
     """ run server """
-    app.run()
+    app.run(debug = True)
 
 @manager.command
 def install_key():
