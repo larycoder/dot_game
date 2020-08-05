@@ -28,3 +28,30 @@ The output expect of engine will also be:
 2. new current location of car
 
 Since this is a web application, the native language of engine will be javascript
+
+# Quickstart
+
+## Backend
+First, installing nessesary python package:
+
+```
+pip install -r requirement.txt
+```
+
+Next, you should push default data to database
+
+```
+python main.py install
+```
+
+Finally, you run app
+
+```
+python main.py run_app
+```
+
+The swagger document is located in root path, so if you follow default setting of flask, you can read the swagger document in browser path:
+
+```
+localhost:5000/
+```
