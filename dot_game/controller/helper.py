@@ -1,8 +1,10 @@
 import datetime
 import jwt
+from flask import make_response, jsonify
 
 from dot_game.models import KeyModel
-from flask import make_response, jsonify
+from dot_game.controller.view import api
+
 
 def genToken(service_name, id):
     """

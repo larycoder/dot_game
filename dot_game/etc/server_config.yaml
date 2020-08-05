@@ -1,7 +1,9 @@
 ---
-# BCRYPT_LOG_ROUNDS: 5
 BCRYPT_LOG_ROUNDS: 13
 SQLALCHEMY_TRACK_MODIFICATIONS: false
-# SQLALCHEMY_DATABASE_URI: sqlite:////tmp/flask/db/test.db
 SQLALCHEMY_DATABASE_URI: sqlite:///db/dot_game.db
+
+# Test config
+#BCRYPT_LOG_ROUNDS: 5
+#SQLALCHEMY_DATABASE_URI: sqlite:////tmp/flask/db/test.db
 ...

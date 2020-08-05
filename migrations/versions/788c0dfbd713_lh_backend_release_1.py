@@ -1,8 +1,8 @@
-"""LH   : link user_id to guideline table
+"""LH    : backend release 1
 
-Revision ID: 81e9391e91f1
-Revises: cb91e08b6d4b
-Create Date: 2020-08-01 11:55:27.695195
+Revision ID: 788c0dfbd713
+Revises: 
+Create Date: 2020-08-05 08:52:44.741349
 
 """
 from alembic import op
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '81e9391e91f1'
-down_revision = 'cb91e08b6d4b'
+revision = '788c0dfbd713'
+down_revision = None
 branch_labels = None
 depends_on = None
 

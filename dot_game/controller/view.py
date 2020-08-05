@@ -1,18 +1,39 @@
+import json
+
 from flask import Blueprint, request, make_response, jsonify
-from flask_restful import Resource, Api
+from flask_restplus import Api, Resource, fields, marshal_with
 
-from dot_game import db, bcrypt
-
-from dot_game.models import UserModel, GuideLineModel
-from dot_game.controller.helper import genToken, regenToken, checkAuth
 
 core_blueprint = Blueprint('core', __name__)
-core_api = Api(core_blueprint)
+core_api = Api(core_blueprint, version = '0.1.0', title = 'Core API')
+api = core_api # for convenient purpose
+
+from dot_game import db, bcrypt
+from dot_game.models import UserModel, GuideLineModel
+from dot_game.controller.helper import genToken, regenToken, checkAuth
+from dot_game.api_doc_model import *
 
 class RegisterAPI(Resource):
     """
     User Register Resource
     """
+    @api.expect(AuthReqModel)
+    @api.response(
+        201,
+        'Successfully registered.',
+        SuccessResModel
+    )
+    @api.response(
+        401,
+        'Some error occurred. Please try again.',
+        ErrorResModel
+    )
+    @api.response(
+        202,
+        'User already exists. Please Log in.',
+        ErrorResModel
+    )
+
     def post(self):
         # get post data
         post_data = request.get_json()
@@ -61,6 +82,22 @@ class LoginAPI(Resource):
     """
     User Login Resource
     """
+    @api.expect(AuthReqModel)
+    @api.response(
+        200,
+        'Successfully logged in.',
+        SuccessResModel
+    )
+    @api.response(
+        404,
+        'User or password is wrong.',
+        ErrorResModel
+    )
+    @api.response(
+        500,
+        'Try again.',
+        ErrorResModel
+    )
     
     def post(self):
         # get post data
@@ -99,6 +136,23 @@ class GuideLineImportAPI(Resource):
     """
     Import list of guideline
     """
+    @api.expect(AuthHeaderReq)
+    @api.response(
+        200,
+        'Successfully import instruction.',
+        SuccessResModel
+    )
+    @api.response(
+        500,
+        'Something wrong happend. Please try again.',
+        ErrorResModel
+    )
+    @api.response(
+        401,
+        'Authorization problem',
+        ErrorResModel
+    )
+
     def post(self):
         post_data = request.get_json()
         resp = checkAuth(request)
@@ -140,6 +194,23 @@ class GuideLineListAPI(Resource):
     """
     Get list of guideline
     """
+    @api.expect(AuthHeaderReq)
+    @api.response(
+        200,
+        'Successfully get guideline.',
+        GuidelineListSucResModel
+    )
+    @api.response(
+        500,
+        'Something wrong happend. Please try again.',
+        ErrorResModel
+    )
+    @api.response(
+        401,
+        'Authorization problem',
+        ErrorResModel
+    )
+
     def get(self):
         auth_header = request.headers.get('Authorization')
 
